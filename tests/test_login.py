@@ -18,5 +18,3 @@ class TestLogin:
         login.forgotPassword()
         page.wait_for_url("**forgot-password**")
         assert "forgot-password" in page.url,f"Expected Forgot Password: {page.url}"
-        forgotpassword= ForgotPage(page)
-        forgotpassword.BacktoLogin()
