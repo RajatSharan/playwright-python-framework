@@ -15,4 +15,7 @@ class LoginPage(Basepage):
 
     def forgotPassword(self):
         self.click(self.FORGOT_PASSWORD_BUTTON)
+        
+    def Register_New_Account(self):
+        self.click(self.SIGNUP_BUTTON)
     

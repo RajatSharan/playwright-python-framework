@@ -17,7 +17,7 @@ class TestForgotPassword:
         Login.navigate(Config.BASE_URL + "/login")
         Login.forgotPassword()
         forgotpassword= ForgotPage(page)
-        forgotpassword.click(forgotpassword.Back_to_Login_Link)
+        forgotpassword.reset_password_button()
     
     def test_reset_button_is_disabled_without_email(self,page):
         Login=LoginPage(page)
