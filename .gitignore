@@ -1,10 +1,19 @@
-allure-results/
-allure-report/
-__pycache__/*
-pages/__pycache__/*
-utils/__pycache__/*
-tests/__pycache__/*
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
 venv/
 .venv/
+
+# Allure
+allure-results/
+allure-report/
+
+# VS Code
 .vscode/
-Readme/
+
+# OS Files
+.DS_Store
+Thumbs.db
