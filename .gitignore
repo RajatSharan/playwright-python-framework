@@ -4,3 +4,5 @@ __pycache__/*
 pages/__pycache__/*
 utils/__pycache__/*
 tests/__pycache__/*
+venv/
+.venv/
