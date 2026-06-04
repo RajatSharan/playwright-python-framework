@@ -1,0 +1,16 @@
+# Browser Automation
+playwright>=1.44.0
+ 
+# Test Runner
+pytest>=8.2.0
+pytest-playwright>=0.5.0
+ 
+# Allure Reporting
+allure-pytest>=2.13.5
+ 
+# Test Data Generation
+faker>=25.0.0
+ 
+# Utilities
+python-dotenv>=1.0.0
+ 
