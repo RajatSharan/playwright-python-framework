@@ -1,6 +1,5 @@
 allure-results/
 allure-report/
-venv/*
 __pycache__/*
 pages/__pycache__/*
 utils/__pycache__/*
