@@ -26,6 +26,9 @@ class Basepage:
     def verify_text(self, locator, text):
         expect(locator).to_have_text(text)
     
+    def check(self, locator: str):
+        self.page.locator(locator).check()
+    
     
     
     

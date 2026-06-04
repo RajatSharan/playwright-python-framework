@@ -2,9 +2,10 @@ from pages.base_page import Basepage
 from pages.login_page import LoginPage
 from pages.forgot_page import ForgotPage
 from utils.config import Config
-
+import pytest
 class TestForgotPassword:
     
+    @pytest.mark.smoke
     def test_reset_password_request_is_successful(self,page):
         login = LoginPage(page)
         login.navigate(Config.BASE_URL + "/login")
@@ -12,6 +13,7 @@ class TestForgotPassword:
         forgotpassword= ForgotPage(page)
         forgotpassword.Email_Address(Config.USERNAME)
     
+    @pytest.mark.regression
     def test_to_verify_Back_To_Login_Link_is_Working(self,page):
         Login=LoginPage(page)
         Login.navigate(Config.BASE_URL + "/login")
@@ -19,6 +21,7 @@ class TestForgotPassword:
         forgotpassword= ForgotPage(page)
         forgotpassword.reset_password_button()
     
+    @pytest.mark.regression
     def test_reset_button_is_disabled_without_email(self,page):
         Login=LoginPage(page)
         Login.navigate(Config.BASE_URL + "/login")

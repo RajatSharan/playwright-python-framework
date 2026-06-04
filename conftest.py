@@ -1,4 +1,5 @@
 import pytest
+from utils.test_data import TestData
 
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
@@ -17,3 +18,7 @@ def close_after_test(page):
         page.close()       # close page gracefully
     except Exception:
         pass  
+    
+@pytest.fixture
+def user_data():
+    return TestData.registration_user()
