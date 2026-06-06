@@ -3,9 +3,11 @@ from pages.login_page import LoginPage
 from pages.dashboard_page import Dashboard
 from pages.cart_page import CartPage
 from pages.order_confirmation_page import OrderConfirmationPage
+import pytest
 
 class TestPurchasePlantFlow:
 
+    @pytest.mark.e2e
     def test_user_can_purchase_plant_successfully(self,page):
         login=LoginPage(page)
         login.login_as_default_user()
