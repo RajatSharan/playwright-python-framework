@@ -8,13 +8,15 @@ import pytest
 
 class TestDashboard:
 
+    @pytest.mark.regression
     def test_MyOrderLink_redirects_to_My_Order_page(self,page):
         login=LoginPage(page)
         login.login_as_default_user()
         page.wait_for_url("**dashboard**")
         dashboard= Dashboard(page)
         dashboard.MY_Order_Link()
-        
+      
+    @pytest.mark.smoke   
     #@pytest.mark.parametrize("plantname", ["Monstera", "Snake Plant", "Fiddle Leaf Fig"])
     def test_user_can_search_for_plant(self,page):
         login=LoginPage(page)

@@ -9,6 +9,10 @@ def browser_context_args(browser_context_args):
         "ignore_https_errors" : True,
     }
 
+@pytest.fixture
+def user_data():
+    return TestData.registration_user()
+
 # This runs after EVERY test automatically
 @pytest.fixture(autouse=True)
 def close_after_test(page):

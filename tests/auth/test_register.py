@@ -10,13 +10,13 @@ class TestRegister:
     @pytest.mark.regression
     def test_user_is_redirected_to_registration_page(self,page):
         login=LoginPage(page)
-        login.navigate(Config.BASE_URL+'login')
+        login.navigate(Config.BASE_URL+"/login")
         login.Register_New_Account()
      
     @pytest.mark.smoke   
     def test_user_registration_is_successful(self, page,user_data):
         login=LoginPage(page)
-        login.navigate(Config.BASE_URL+'login')
+        login.navigate(Config.BASE_URL+"/login")
         login.Register_New_Account()
         register = RegisterPage(page)
         register.fill_registration_form(user_data)

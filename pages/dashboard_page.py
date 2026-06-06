@@ -41,3 +41,9 @@ class Dashboard(Basepage):
     def click_Cart_Icon(self):
         self.click(self.cartIcon)
         
+    def search_and_select_plant(self, plant_name):
+        plant_name = "Snake Plant"
+        self.search_plant(plant_name) 
+        self.click_buy_now()
+        self.click_Cart_Icon()
+        
