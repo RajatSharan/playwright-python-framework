@@ -1,7 +1,7 @@
 class Config:
 
     # --- WEB ---
-    BASE_URL = "http://localhost:8082/"
+    BASE_URL = "http://platnest.test/"
 
     # --- API ---
    # API_BASE_URL = ""

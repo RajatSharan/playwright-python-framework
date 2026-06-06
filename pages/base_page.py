@@ -23,8 +23,14 @@ class Basepage:
     def verify_element_is_visible(self, locator):
         expect(locator).to_be_visible()
 
-    def verify_text(self, locator, text):
-        expect(locator).to_have_text(text)
+    def verify_text(self, locator, text,timeout=None):
+        string_text = str(text)
+        if isinstance(locator, str):
+            locator = self.page.locator(locator)
+        if timeout:
+            expect(locator).to_have_text(text, timeout=timeout)
+        else:
+            expect(locator).to_have_text(text)
     
     def check(self, locator: str):
         self.page.locator(locator).check()

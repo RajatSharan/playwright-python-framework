@@ -17,8 +17,5 @@ def close_after_test(page):
     try:
         page.close()       # close page gracefully
     except Exception:
-        pass  
+        pass 
     
-@pytest.fixture
-def user_data():
-    return TestData.registration_user()

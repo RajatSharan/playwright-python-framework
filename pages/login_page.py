@@ -1,4 +1,5 @@
 from pages.base_page import Basepage
+from utils.config import Config
 
 class LoginPage(Basepage):
     USERNAME_FIELD  = "#username"
@@ -18,4 +19,8 @@ class LoginPage(Basepage):
         
     def Register_New_Account(self):
         self.click(self.SIGNUP_BUTTON)
+        
+    def login_as_default_user(self):
+        self.navigate(Config.BASE_URL + "/login")
+        self.login(Config.USERNAME, Config.PASSWORD)
     
