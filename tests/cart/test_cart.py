@@ -1,18 +1,26 @@
-from pages.base_page import Basepage
+# tests/cart/test_cart.py
+import pytest
+import allure
 from pages.login_page import LoginPage
 from pages.dashboard_page import Dashboard
 from pages.cart_page import CartPage
-import pytest
 
+
+@allure.feature("Cart")
 class TestCart:
-    
-    @pytest.mark.smoke   
-    def test_user_can_place_order_successfully(self,page):
-        login = LoginPage(page)
-        login.login_as_default_user()
-        dashboard=Dashboard(page)
-        dashboard.search_and_select_plant(plant_name = "Snake Plant")
-        cart= CartPage(page)
+
+    @pytest.mark.smoke
+    @allure.story("User can add item to cart and proceed to checkout")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_user_can_place_order_successfully(self, logged_in_page):
+        # logged_in_page fixture handles login — no repeated login code here
+        dashboard = Dashboard(logged_in_page)
+        dashboard.search_and_select_plant(plant_name="Snake Plant")
+
+        cart = CartPage(logged_in_page)
         cart.click_on_Checkout()
-        page.wait_for_timeout(3000)
-        
+
+        # Wait for checkout page to load instead of hardcoded sleep
+        logged_in_page.wait_for_url("**checkout**")
+        assert "checkout" in logged_in_page.url, \
+            f"Expected checkout page but got: {logged_in_page.url}"

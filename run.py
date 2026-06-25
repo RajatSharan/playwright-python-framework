@@ -1,26 +1,50 @@
+# run.py
 import subprocess
-import tempfile
-import shutil
 import sys
+import os
 
-allure_dir = tempfile.mkdtemp(prefix="allure_")
+def run_tests():
+    """
+    Unified test runner. Usage:
+      python run.py              → all tests, headless
+      python run.py smoke        → smoke tests only
+      python run.py regression   → regression tests
+      python run.py smoke --headed   → with browser visible
+      python run.py all -n 4     → parallel with 4 workers
+    """
 
-marker = sys.argv[1] if len(sys.argv) > 1 else None
+    args = sys.argv[1:]
+    marker = None
+    extra_flags = []
 
-if marker:
-    command = f"pytest -m {marker} --alluredir={allure_dir}"
-    print(f"Running {marker.upper()} tests...")
-else:
-    command = f"pytest --alluredir={allure_dir}"
-    print("Running all tests...")
+    for arg in args:
+        if arg in ("smoke", "regression", "e2e", "api"):
+            marker = arg
+        else:
+            extra_flags.append(arg)
 
-subprocess.run(command, shell=True)
+    # Base command — always generate Allure results
+    cmd = ["pytest", "--alluredir=allure-results"]
 
-print("Opening Allure Report...")
+    if marker:
+        cmd += ["-m", marker]
+        print(f"\n🎯 Running [{marker.upper()}] tests...\n")
+    else:
+        print("\n🚀 Running ALL tests...\n")
 
-subprocess.run(
-    f"allure serve {allure_dir}",
-    shell=True
-)
+    # Add any extra flags (e.g. --headed, -n 4)
+    cmd += extra_flags
 
-shutil.rmtree(allure_dir, ignore_errors=True)
+    # Run tests
+    result = subprocess.run(cmd)
+
+    # Open Allure report
+    print("\n📊 Opening Allure Report...\n")
+    subprocess.run(["allure", "serve", "allure-results"])
+
+    # Exit with pytest's exit code (important for CI)
+    sys.exit(result.returncode)
+
+
+if __name__ == "__main__":
+    run_tests()

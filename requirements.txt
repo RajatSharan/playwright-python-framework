@@ -1,16 +1,29 @@
+# requirements.txt
+
 # Browser Automation
 playwright>=1.44.0
- 
+
 # Test Runner
 pytest>=8.2.0
 pytest-playwright>=0.5.0
- 
+
+# Parallel Execution  ← NEW: was missing
+pytest-xdist>=3.5.0
+
+# Retry Flaky Tests  ← NEW: was missing
+pytest-rerunfailures>=14.0
+
 # Allure Reporting
 allure-pytest>=2.13.5
- 
+
 # Test Data Generation
 faker>=25.0.0
- 
-# Utilities
+
+# Environment / Config  ← already in yours, good
 python-dotenv>=1.0.0
- 
+
+# HTTP / API Testing (for future API tests)  ← NEW
+requests>=2.31.0
+
+# Typing support
+typing-extensions>=4.9.0
