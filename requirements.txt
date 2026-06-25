@@ -1,31 +1,31 @@
-# requirements.txt
+# ══════════════════════════════════════════════════════════════════════════════
+# PLAYWRIGHT PYTHON AUTOMATION FRAMEWORK - DEPENDENCIES
+# ══════════════════════════════════════════════════════════════════════════════
 
-# Browser Automation
-playwright>=1.44.0
+# ─── CORE BROWSER AUTOMATION ────────────────────────────────────────────────
+playwright>=1.44.0          # Cross-browser automation (Chrome, Firefox, Safari)
 
-# Test Runner
-pytest>=8.2.0
-pytest-playwright>=0.5.0
+# ─── TEST RUNNER & PLUGINS ─────────────────────────────────────────────────
+pytest>=8.2.0               # Test framework
+pytest-playwright>=0.5.0    # Playwright plugin for pytest
 
-# Parallel Execution  ← NEW: was missing
-pytest-xdist>=3.5.0
+# ─── PARALLEL EXECUTION ────────────────────────────────────────────────────
+pytest-xdist>=3.5.0         # Parallel test execution (-n 4)
 
-# Retry Flaky Tests  ← NEW: was missing
-pytest-rerunfailures>=14.0
+# ─── RETRY MECHANISM ────────────────────────────────────────────────────────
+pytest-rerunfailures>=14.0  # Automatic retry for flaky tests
 
-# Allure Reporting
-allure-pytest>=2.13.5
+# ─── REPORTING & EVIDENCE ───────────────────────────────────────────────────
+allure-pytest>=2.13.5       # Allure report integration
 
-# Test Data Generation
-faker>=25.0.0
+# ─── TEST DATA GENERATION ───────────────────────────────────────────────────
+faker>=25.0.0               # Generate realistic test data (names, emails, etc.)
 
-# Environment / Config  ← already in yours, good
-python-dotenv>=1.0.0
+# ─── CONFIGURATION & ENVIRONMENT ────────────────────────────────────────────
+python-dotenv>=1.0.0        # Load environment variables from .env file
 
-# HTTP / API Testing (for future API tests)  ← NEW
-requests>=2.31.0
+# ─── API TESTING (OPTIONAL) ────────────────────────────────────────────────
+requests>=2.31.0            # HTTP client for API testing
 
-# Typing support
-typing-extensions>=4.9.0
-
-sauceclient>=1.0.0
+# ─── TYPING SUPPORT ────────────────────────────────────────────────────────
+typing-extensions>=4.9.0    # Enhanced type hints for Python < 3.10
