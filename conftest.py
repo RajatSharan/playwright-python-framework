@@ -146,14 +146,76 @@ def log_test_lifecycle(request):
 
 
 # ─── ALLURE ENVIRONMENT INFO ────────────────────────────────────────────
+# ─── ALLURE ENVIRONMENT INFO ────────────────────────────────────────────
 @pytest.fixture(scope="session", autouse=True)
 def add_environment_info():
-    """Add environment info to Allure report."""
-    use_sauce_labs = os.getenv("USE_SAUCE_LABS", "false").lower() == "true"
-    
-    allure.environment(
-        execution_type="Sauce Labs Cloud ☁️" if use_sauce_labs else "Local Browser 🖥️",
-        base_url=Config.BASE_URL,
-        environment=Config.ENV,
-        sauce_region=SauceConfig.REGION if use_sauce_labs else "N/A",
-    )
+    """
+    Add execution environment details to Allure report.
+    Allure Python does not support allure.environment().
+    It reads environment.properties file from allure-results folder.
+    """
+
+    try:
+        os.makedirs(
+            "allure-results",
+            exist_ok=True
+        )
+
+        use_sauce_labs = (
+            os.getenv(
+                "USE_SAUCE_LABS",
+                "false"
+            ).lower() == "true"
+        )
+
+        execution_type = (
+            "Sauce Labs Cloud ☁️"
+            if use_sauce_labs
+            else "Local Browser 🖥️"
+        )
+
+        sauce_region = (
+            SauceConfig.REGION
+            if use_sauce_labs
+            else "N/A"
+        )
+
+
+        environment_file = (
+            "allure-results/environment.properties"
+        )
+
+
+        with open(
+            environment_file,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            file.write(
+                f"Environment={Config.ENV}\n"
+            )
+
+            file.write(
+                f"Base URL={Config.BASE_URL}\n"
+            )
+
+            file.write(
+                f"Execution Type={execution_type}\n"
+            )
+
+            file.write(
+                f"Sauce Region={sauce_region}\n"
+            )
+
+
+        logger.info(
+            "✅ Allure environment information added successfully"
+        )
+
+
+    except Exception as e:
+
+        logger.warning(
+            f"⚠️ Unable to create Allure environment details: {e}"
+        )
