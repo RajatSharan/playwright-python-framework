@@ -1,9 +1,9 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 from pages.login_page import LoginPage 
 from utils.config import Config
 
 
-class Dashboard(Basepage):
+class Dashboard(BasePage):
     
     logo ="text=PlantNest";
     dashboardMenu = "text=Dashboard";

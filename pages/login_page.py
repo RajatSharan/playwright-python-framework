@@ -1,7 +1,7 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 from utils.config import Config
 
-class LoginPage(Basepage):
+class LoginPage(BasePage):
     USERNAME_FIELD  = "#username"
     PASSWORD_FIELD  = "#password"
     LOGIN_BUTTON   = "#signInButton"

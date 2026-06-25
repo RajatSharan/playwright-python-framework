@@ -1,7 +1,7 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 
 
-class Checkout(Basepage):
+class Checkout(BasePage):
     
     PLACE_ORDER_BUTTON ="button.btn-place-order"
     

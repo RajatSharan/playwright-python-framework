@@ -1,9 +1,9 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 from playwright.sync_api import expect
 
 
 
-class RegisterPage(Basepage):
+class RegisterPage(BasePage):
     
     FIRST_NAME = "#firstName"
     LAST_NAME = "#lastName"

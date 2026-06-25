@@ -1,6 +1,6 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 
-class ForgotPage(Basepage):
+class ForgotPage(BasePage):
     
     EMAIL="#email"
     RESET_BUTTON="#resetPasswordBtn"

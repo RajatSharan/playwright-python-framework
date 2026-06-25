@@ -1,8 +1,8 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 from pages.login_page import LoginPage
 
 
-class CartPage(Basepage):
+class CartPage(BasePage):
     
     checkout='.btn.btn-success.btn-place-order'
     

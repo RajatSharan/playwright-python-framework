@@ -1,6 +1,6 @@
-from pages.base_page import Basepage
+from pages.base_page import BasePage
 
-class OrderConfirmationPage(Basepage):
+class OrderConfirmationPage(BasePage):
 
     SUCCESS_MESSAGE = "text=Thank you for your purchase!"
     
