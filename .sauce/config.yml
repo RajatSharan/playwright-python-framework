@@ -1,18 +1,21 @@
 apiVersion: v1alpha
-kind: pytest
+kind: playwright
 sauce:
   region: eu-central-1
   concurrency: 1
-docker:
-  image: saucelabs/stt-playwright-pytest-node:latest
-rootDir: ./
-pytest:
-  testExecTimeout: 300
+playwright:
+  version: 1.60.0
 suites:
   - name: Platnest Smoke Tests
     platformName: Windows 11
-    testFiles:
-      - tests/auth/test_register.py
+    testMatch:
+      - "tests/auth/test_register.py"
+    params:
+      browserName: chromium
+    env:
+      APP_USERNAME: rajatsharan05@gmail.com
+      APP_PASSWORD: Admin@123
+      BASE_URL: http://platnest.test
 reporters:
   spotlight:
     enabled: true
