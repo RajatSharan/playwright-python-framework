@@ -1,0 +1,13 @@
+.git/
+.vscode/
+__pycache__/
+*.pyc
+venv/
+allure-results/
+allure-report/
+test-results/
+.pytest_cache/
+logs/
+*.log
+node_modules/
+.sauce/

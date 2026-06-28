@@ -33,7 +33,6 @@ class RegisterPage(BasePage):
         self.click(self.REGISTER_BUTTON)
         
     def verify_registration_successful(self):
-        self.verify_text(
-            self.page.get_by_role("alert"),
-            "Registration successful! Please log in."
-        )
+        alert = self.page.get_by_role("alert")
+        alert.wait_for(state="visible")
+        return "Registration successful! Please log in." in alert.inner_text()

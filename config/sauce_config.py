@@ -1,128 +1,56 @@
 # config/sauce_config.py
-"""
-Sauce Labs Cloud Configuration
-Handles connection to Sauce Labs cloud browsers for Playwright
-"""
-
 import os
+import json
+from urllib.parse import quote
 
 
 class SauceConfig:
-    """
-    Sauce Labs cloud execution configuration.
-    Credentials loaded from environment variables (never hardcoded).
-    """
 
-    # Sauce Labs credentials
-    USERNAME: str = os.getenv("SAUCE_USERNAME", "")
+    USERNAME:   str = os.getenv("SAUCE_USERNAME", "")
     ACCESS_KEY: str = os.getenv("SAUCE_ACCESS_KEY", "")
-    
-    # Region (us-west-1 or eu-central-1)
-    REGION: str = os.getenv("SAUCE_REGION", "us-west-1")
-    
-    # Data center URL
-    DATA_CENTER: str = f"ondemand.{REGION}.saucelabs.com"
+    REGION:     str = os.getenv("SAUCE_REGION", "eu-central-1")
+
+    REGION_MAP = {
+        "eu-central-1": "ondemand.eu-central-1.saucelabs.com",
+        "us-west-1":    "ondemand.us-west-1.saucelabs.com",
+        "us-east-4":    "ondemand.us-east-4.saucelabs.com",
+    }
 
     @classmethod
     def get_connection_url(cls) -> str:
         """
-        Get Sauce Labs WebSocket connection URL for Playwright.
-        
-        Format: wss://username:accesskey@ondemand.REGION.saucelabs.com/wd/hub
-        
-        Returns:
-            Connection URL or empty string if credentials missing
+        Build correct Playwright WebSocket URL for Sauce Labs.
+        Playwright uses /playwright endpoint — NOT /wd/hub (that's Selenium).
         """
-        if not cls.USERNAME or not cls.ACCESS_KEY:
-            return ""
-        
+        host = cls.REGION_MAP.get(cls.REGION, "ondemand.eu-central-1.saucelabs.com")
+
+        capabilities = {
+            "browserName":    "chrome",
+            "browserVersion": "latest",
+            "platformName":   "Windows 11",
+            "sauce:options": {
+                "username":         cls.USERNAME,
+                "accessKey":        cls.ACCESS_KEY,
+                "name":             "Platnest Tests",
+                "build":            os.getenv("GITHUB_RUN_NUMBER", "local-build"),
+                "tunnelName":       os.getenv("SAUCE_TUNNEL_NAME", "platnest-tunnel"),
+                "screenResolution": "1280x720",
+            }
+        }
+
+        caps_encoded = quote(json.dumps(capabilities))
+
+        # ✅ CORRECT: /playwright — NOT /wd/hub
         return (
             f"wss://{cls.USERNAME}:{cls.ACCESS_KEY}"
-            f"@{cls.DATA_CENTER}/wd/hub"
+            f"@{host}:443/playwright"
+            f"?capabilities={caps_encoded}"
         )
-
-    # Browser capability profiles for different browsers
-    BROWSER_CAPABILITIES = {
-        "chrome": {
-            "browserName": "chrome",
-            "browserVersion": "latest",
-            "platformName": "Windows 11",
-            "sauce:options": {
-                "build": os.getenv("GITHUB_RUN_NUMBER", "local-build"),
-                "name": "Playwright Python Framework - Chrome",
-                "screenResolution": "1920x1080",
-            }
-        },
-        "firefox": {
-            "browserName": "firefox",
-            "browserVersion": "latest",
-            "platformName": "Windows 11",
-            "sauce:options": {
-                "build": os.getenv("GITHUB_RUN_NUMBER", "local-build"),
-                "name": "Playwright Python Framework - Firefox",
-                "screenResolution": "1920x1080",
-            }
-        },
-        "edge": {
-            "browserName": "MicrosoftEdge",
-            "browserVersion": "latest",
-            "platformName": "Windows 11",
-            "sauce:options": {
-                "build": os.getenv("GITHUB_RUN_NUMBER", "local-build"),
-                "name": "Playwright Python Framework - Edge",
-                "screenResolution": "1920x1080",
-            }
-        },
-        "safari": {
-            "browserName": "safari",
-            "browserVersion": "latest",
-            "platformName": "macOS 14",
-            "sauce:options": {
-                "build": os.getenv("GITHUB_RUN_NUMBER", "local-build"),
-                "name": "Playwright Python Framework - Safari",
-                "screenResolution": "1920x1080",
-            }
-        },
-    }
 
     @classmethod
     def validate(cls) -> bool:
-        """
-        Validate Sauce Labs configuration.
-        
-        Returns:
-            True if valid, raises ValueError otherwise
-        """
-        if not cls.USERNAME or not cls.ACCESS_KEY:
-            raise ValueError(
-                "Sauce Labs credentials not configured.\n"
-                "Please set the following environment variables:\n"
-                "  SAUCE_USERNAME - Your Sauce Labs username\n"
-                "  SAUCE_ACCESS_KEY - Your Sauce Labs access key\n"
-                "  SAUCE_REGION - Optional (default: us-west-1)\n"
-                "\n"
-                "Get credentials from: https://app.saucelabs.com/user-settings/api-keys"
-            )
+        if not cls.USERNAME:
+            raise ValueError("SAUCE_USERNAME is not set in .env")
+        if not cls.ACCESS_KEY:
+            raise ValueError("SAUCE_ACCESS_KEY is not set in .env")
         return True
-
-    @classmethod
-    def get_capability(cls, browser: str) -> dict:
-        """
-        Get capability profile for a specific browser.
-        
-        Args:
-            browser: Browser name (chrome, firefox, edge, safari)
-            
-        Returns:
-            Browser capability dictionary
-            
-        Raises:
-            KeyError if browser not supported
-        """
-        if browser not in cls.BROWSER_CAPABILITIES:
-            raise KeyError(
-                f"Unsupported browser: {browser}\n"
-                f"Available: {', '.join(cls.BROWSER_CAPABILITIES.keys())}"
-            )
-        
-        return cls.BROWSER_CAPABILITIES[browser]

@@ -7,11 +7,11 @@ load_dotenv()
 
 class Config:
     # --- WEB ---
-    BASE_URL: str = os.getenv("BASE_URL", "http://platnest.test/")
+    BASE_URL: str = os.getenv("BASE_URL", "http://platnest.test")
 
     # --- Credentials ---
-    USERNAME: str = os.getenv("USERNAME", "")
-    PASSWORD: str = os.getenv("PASSWORD", "")
+    USERNAME: str = os.getenv("APP_USERNAME", "")
+    PASSWORD: str = os.getenv("APP_PASSWORD", "")
 
     # --- Timeouts ---
     TIMEOUT: int = int(os.getenv("TIMEOUT", "30000"))

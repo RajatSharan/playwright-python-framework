@@ -34,4 +34,4 @@ class TestRegister:
         register.click_register()
 
         result = register.verify_registration_successful()
-        assert result, "Registration success message was not shown"
+        assert result, "Registration successful! Please log in."

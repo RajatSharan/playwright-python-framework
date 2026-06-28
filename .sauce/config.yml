@@ -1,0 +1,18 @@
+apiVersion: v1alpha
+kind: pytest
+sauce:
+  region: eu-central-1
+  concurrency: 1
+docker:
+  image: saucelabs/stt-playwright-pytest-node:latest
+rootDir: ./
+pytest:
+  testExecTimeout: 300
+suites:
+  - name: Platnest Smoke Tests
+    platformName: Windows 11
+    testFiles:
+      - tests/auth/test_register.py
+reporters:
+  spotlight:
+    enabled: true

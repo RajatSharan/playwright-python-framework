@@ -13,6 +13,8 @@ class TestLogin:
     @allure.severity(allure.severity_level.CRITICAL)
     def test_valid_login(self, page):
         login = LoginPage(page)
+        print(f"\nUSERNAME: {Config.USERNAME}")
+        print(f"PASSWORD: {Config.PASSWORD}")  
         login.navigate(Config.BASE_URL + "/login")
         login.login(Config.USERNAME, Config.PASSWORD)
         page.wait_for_url("**dashboard**")

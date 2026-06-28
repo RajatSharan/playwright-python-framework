@@ -2,7 +2,7 @@
 import pytest
 import allure
 import os
-from playwright.sync_api import sync_playwright
+import threading
 from utils.config import Config
 from utils.test_data import TestData
 from utils.logger import get_logger
@@ -11,9 +11,7 @@ from config.sauce_config import SauceConfig
 logger = get_logger(__name__)
 
 
-# ─── VALIDATE CONFIGURATION EARLY ────────────────────────────────────────
 def pytest_configure(config):
-    """Runs before test collection - validate config early."""
     try:
         Config.validate()
         logger.info("✅ Configuration validated successfully")
@@ -22,98 +20,120 @@ def pytest_configure(config):
         raise
 
 
-# ─── BROWSER FIXTURE: LOCAL vs SAUCE LABS ───────────────────────────────
 @pytest.fixture(scope="session")
 def browser():
-    """
-    Provides browser instance based on environment:
-    - Local: Uses installed Chromium (headless)
-    - Sauce Labs: Connects via WebSocket to cloud browser
-    """
     use_sauce_labs = os.getenv("USE_SAUCE_LABS", "false").lower() == "true"
-    
+
     logger.info(f"\n{'='*70}")
     logger.info(f"EXECUTION MODE: {'SAUCE LABS CLOUD ☁️' if use_sauce_labs else 'LOCAL BROWSER 🖥️'}")
     logger.info(f"{'='*70}\n")
-    
+
     if use_sauce_labs:
-        return _get_sauce_labs_browser()
+        browser_instance = _connect_sauce_labs_in_thread()
     else:
-        return _get_local_browser()
+        browser_instance = _launch_local_browser_in_thread()
 
+    yield browser_instance
 
-def _get_local_browser():
-    """Launch local Chromium browser."""
-    logger.info("🖥️  Launching local Chromium browser...")
-    playwright = sync_playwright().start()
-    browser = playwright.chromium.launch(headless=True)
-    logger.info("✅ Local browser launched successfully")
-    return browser
-
-
-def _get_sauce_labs_browser():
-    """Connect to Sauce Labs cloud browser via WebSocket."""
     try:
-        SauceConfig.validate()  # Check credentials exist
+        browser_instance.close()
+        logger.info("✅ Browser closed")
+    except Exception:
+        pass
+
+
+def _launch_local_browser_in_thread():
+    result = {}
+    error = {}
+
+    def run():
+        try:
+            from playwright.sync_api import sync_playwright
+            pw = sync_playwright().start()
+            result["playwright"] = pw
+            result["browser"] = pw.chromium.launch(headless=True)
+            logger.info("✅ Local browser launched successfully")
+        except Exception as e:
+            error["error"] = e
+
+    t = threading.Thread(target=run)
+    t.start()
+    t.join()
+
+    if "error" in error:
+        raise error["error"]
+    return result["browser"]
+
+
+def _connect_sauce_labs_in_thread():
+    try:
+        SauceConfig.validate()
     except ValueError as e:
         logger.error(f"❌ {e}")
         raise
-    
+
     sauce_url = SauceConfig.get_connection_url()
-    logger.info(f"🌐 Connecting to Sauce Labs: {sauce_url.split('@')[0]}@***")
-    
-    playwright = sync_playwright().start()
-    
-    try:
-        browser = playwright.chromium.connect(sauce_url)
-        logger.info("✅ Connected to Sauce Labs browser successfully!")
-        return browser
-    except Exception as e:
-        logger.error(f"❌ Failed to connect to Sauce Labs: {e}")
-        raise
+    logger.info("🌐 Connecting to Sauce Labs...")
+
+    result = {}
+    error = {}
+
+    def run():
+        try:
+            from playwright.sync_api import sync_playwright
+            pw = sync_playwright().start()
+            result["playwright"] = pw
+            result["browser"] = pw.chromium.connect(
+                sauce_url,
+                timeout=120000
+            )
+            logger.info("✅ Connected to Sauce Labs successfully!")
+        except Exception as e:
+            error["error"] = e
+
+    t = threading.Thread(target=run)
+    t.start()
+    t.join(timeout=130)
+
+    if t.is_alive():
+        raise TimeoutError("Sauce Labs connection timed out")
+
+    if "error" in error:
+        logger.error(f"❌ Failed to connect: {error['error']}")
+        raise error["error"]
+
+    return result["browser"]
 
 
-# ─── PAGE FIXTURE: Creates fresh page for each test ──────────────────────
 @pytest.fixture
 def page(browser):
-    """Create a new page (tab) for each test."""
     context = browser.new_context(
         viewport={"width": 1280, "height": 720},
         ignore_https_errors=True,
     )
     page = context.new_page()
     page.set_default_timeout(int(Config.TIMEOUT))
-    
-    logger.info(f"📄 New page created")
+    logger.info("📄 New page created")
     yield page
-    
     context.close()
-    logger.info(f"📄 Page closed and cleaned up")
+    logger.info("📄 Page closed and cleaned up")
 
 
-# ─── BASE URL ────────────────────────────────────────────────────────────
 @pytest.fixture(scope="session")
 def base_url():
-    """Provide base URL from config."""
     return Config.BASE_URL
 
 
-# ─── TEST DATA ───────────────────────────────────────────────────────────
 @pytest.fixture
 def user_data():
-    """Generate fresh test data for each test."""
     data = TestData.registration_user()
     logger.debug(f"Generated user: {data.get('email', 'N/A')}")
     return data
 
 
-# ─── SCREENSHOT ON FAILURE ──────────────────────────────────────────────
 @pytest.fixture(autouse=True)
 def attach_screenshot_on_failure(page, request):
-    """Auto-capture screenshot on test failure."""
-    yield  # Test runs here
-    
-    # Check if test failed
+    yield
     if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
         try:
             screenshot_bytes = page.screenshot(full_page=True)
@@ -127,95 +147,34 @@ def attach_screenshot_on_failure(page, request):
             logger.warning(f"⚠️  Could not capture screenshot: {e}")
 
 
-# ─── PYTEST HOOK: Mark test outcome ─────────────────────────────────────
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    """Store test result so fixture above can detect failures."""
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)
 
 
-# ─── TEST LOGGING ────────────────────────────────────────────────────────
 @pytest.fixture(autouse=True)
 def log_test_lifecycle(request):
-    """Log test start and end."""
     logger.info(f"\n▶  START: {request.node.name}")
     yield
     logger.info(f"■  END:   {request.node.name}\n")
 
 
-# ─── ALLURE ENVIRONMENT INFO ────────────────────────────────────────────
-# ─── ALLURE ENVIRONMENT INFO ────────────────────────────────────────────
 @pytest.fixture(scope="session", autouse=True)
 def add_environment_info():
-    """
-    Add execution environment details to Allure report.
-    Allure Python does not support allure.environment().
-    It reads environment.properties file from allure-results folder.
-    """
-
     try:
-        os.makedirs(
-            "allure-results",
-            exist_ok=True
-        )
+        os.makedirs("allure-results", exist_ok=True)
+        use_sauce_labs = os.getenv("USE_SAUCE_LABS", "false").lower() == "true"
+        execution_type = "Sauce Labs Cloud ☁️" if use_sauce_labs else "Local Browser 🖥️"
+        sauce_region = SauceConfig.REGION if use_sauce_labs else "N/A"
 
-        use_sauce_labs = (
-            os.getenv(
-                "USE_SAUCE_LABS",
-                "false"
-            ).lower() == "true"
-        )
+        with open("allure-results/environment.properties", "w", encoding="utf-8") as f:
+            f.write(f"Environment={Config.ENV}\n")
+            f.write(f"Base URL={Config.BASE_URL}\n")
+            f.write(f"Execution Type={execution_type}\n")
+            f.write(f"Sauce Region={sauce_region}\n")
 
-        execution_type = (
-            "Sauce Labs Cloud ☁️"
-            if use_sauce_labs
-            else "Local Browser 🖥️"
-        )
-
-        sauce_region = (
-            SauceConfig.REGION
-            if use_sauce_labs
-            else "N/A"
-        )
-
-
-        environment_file = (
-            "allure-results/environment.properties"
-        )
-
-
-        with open(
-            environment_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
-            file.write(
-                f"Environment={Config.ENV}\n"
-            )
-
-            file.write(
-                f"Base URL={Config.BASE_URL}\n"
-            )
-
-            file.write(
-                f"Execution Type={execution_type}\n"
-            )
-
-            file.write(
-                f"Sauce Region={sauce_region}\n"
-            )
-
-
-        logger.info(
-            "✅ Allure environment information added successfully"
-        )
-
-
+        logger.info("✅ Allure environment information added successfully")
     except Exception as e:
-
-        logger.warning(
-            f"⚠️ Unable to create Allure environment details: {e}"
-        )
+        logger.warning(f"⚠️ Unable to create Allure environment details: {e}")

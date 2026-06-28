@@ -7,7 +7,7 @@ class LoginPage(BasePage):
     LOGIN_BUTTON   = "#signInButton"
     SIGNUP_BUTTON = "a[href='/register']"
     FORGOT_PASSWORD_BUTTON = "a[href='/forgot-password']"
-    BACK_TO_LOGIN="a[herf='/login']"
+    BACK_TO_LOGIN="a[href='/login']"
   
     def login(self, username: str, password: str):
         self.fill(self.USERNAME_FIELD, username)
